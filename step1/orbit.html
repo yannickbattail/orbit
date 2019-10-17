@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>orbite</title>
+</head>
+<body>
+
+<canvas id="scene" width="300" height="300"></canvas>
+
+<script>
+
+var canvas = document.getElementById('scene');
+var ctx = canvas.getContext('2d');
+// set origin to center
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
+var EARTH_ORBIT=100;
+var EARTH_SIZE=10;
+var SUN_SIZE=20;
+
+function clearBackground() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+}
+function drawCircle(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+}
+function polarToRect(angle, dist) {
+    var x1 = dist * Math.cos(angle);
+    var y1 = dist * Math.sin(angle);
+    return {x: x1, y: y1};
+}
+function drawSun() {
+    drawCircle(0, 0, SUN_SIZE, 'yellow');
+}
+function drawEarth() {
+    var coord = polarToRect(i, EARTH_ORBIT);
+    drawCircle(coord.x, coord.y, EARTH_SIZE, 'green');
+}
+
+var i = 0;
+function redrawSpace() {
+    clearBackground();
+    drawSun();
+    drawEarth();
+    i = i + Math.PI/300;
+}
+
+function redraw() {
+    redrawSpace();
+    window.requestAnimationFrame(redraw);
+};
+
+window.requestAnimationFrame(redraw);
+</script>
+</body>
+
+</html>

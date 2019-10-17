@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>orbite</title>
+</head>
+<body>
+
+<canvas id="scene" width="300" height="300"></canvas>
+
+<script>
+
+var canvas = document.getElementById('scene');
+var ctx = canvas.getContext('2d');
+// set origin to center
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
+var gravity = {r: 0.005, teta: Math.PI};
+
+var earth = {
+    size: 10,
+    color: 'green',
+    position:  {r: 100, teta: 0},
+    speed: {r: 10, teta: -Math.PI/2} // geo centric speed
+};
+var sun = {
+    size: 20,
+    color: 'yellow',
+    position:  {r: 0, teta: 0},
+    speed: {r: 0, teta: 0}
+};
+function polarToRect(coord) {
+    var x1 = coord.r * Math.cos(coord.teta);
+    var y1 = coord.r * Math.sin(coord.teta);
+    return {x: x1, y: y1};
+}
+function rectToPolar(coord){
+    distance = Math.sqrt(coord.x*coord.x + coord.y*coord.y);
+    radians = Math.atan2(coord.y, coord.x);
+    polarCoor = { r: distance, teta: radians };
+    return polarCoor;
+}
+
+function clearBackground() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+}
+function drawCircle(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawPlanet(astre) {
+    var coord = polarToRect(astre.position);
+    drawCircle(coord.x, coord.y, astre.size, astre.color);
+}
+
+function addPolarVect(v1,v2) {
+    var s = polarToRect(v1);
+    var g = polarToRect(v2);
+    var newS = {x: s.x+g.x, y: s.y+g.y};
+    return rectToPolar(newS); 
+}
+
+function addGravity(speed, gravity) {
+    return addPolarVect(speed, gravity); 
+}
+function moveEarth(earth, gravity) {
+    earth.speed = addGravity(earth.speed, gravity);
+    var helioCentricSpeed = { r: earth.speed.r, teta: earth.speed.teta + earth.position.teta };
+    earth.position = addPolarVect(earth.position, helioCentricSpeed);
+}
+
+function redrawSpace() {
+    clearBackground();
+    moveEarth(earth, gravity);
+    drawPlanet(sun);
+    drawPlanet(earth);
+}
+
+function redraw() {
+    redrawSpace();
+    window.requestAnimationFrame(redraw);
+};
+
+window.requestAnimationFrame(redraw);
+</script>
+</body>
+
+</html>
