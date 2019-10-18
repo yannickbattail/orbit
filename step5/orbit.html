@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>orbit</title>
+</head>
+<body>
+
+<canvas id="scene" width="300" height="300"></canvas>
+<br />
+<button onclick="reconfigure()">Run</button>
+<br />
+<div>
+    <textarea id="univers" cols="40" rows="30">({
+        'drawPath' : false,
+        'gravity' : 0.000001,
+        'earth' : {
+            'size': 3,
+            'color': 'green',
+            'position': {
+                'x': 150,
+                'y': 0
+            },
+            'speed': {
+                'x': 0,
+                'y': 1
+            }
+        },
+        'sun': {
+            'size': 20,
+            'color': 'yellow',
+            'position': {
+                'x': 0,
+                'y': 0
+            },
+            'speed': {
+                'x': 0,
+                'y': 0
+            }
+        }
+    })</textarea>
+</div>
+
+<script>
+
+var canvas = document.getElementById('scene');
+var ctx = canvas.getContext('2d');
+// set origin to center
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
+var run = true;
+
+var univers = {};
+
+function polarToRect(coord) {
+    var x1 = coord.r * Math.cos(coord.teta);
+    var y1 = coord.r * Math.sin(coord.teta);
+    return {x: x1, y: y1};
+}
+function rectToPolar(coord){
+    distance = Math.sqrt(coord.x*coord.x + coord.y*coord.y);
+    radians = Math.atan2(coord.y, coord.x);
+    return { r: distance, teta: radians };
+}
+
+function clearBackground() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+}
+function drawCircle(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawPlanet(astre) {
+    drawCircle(astre.position.x, astre.position.y, astre.size, astre.color);
+}
+
+function addVector(v1,v2) {
+    return {x: v1.x+v2.x, y: v1.y+v2.y}; 
+}
+
+function getGravityVector(astrePosition, gravityValue) {
+    var astrePolar = rectToPolar(astrePosition);
+    return polarToRect({r: -gravityValue * astrePolar.r *astrePolar.r, teta: astrePolar.teta});
+}
+
+function moveEarth(earth, gravityValue) {
+    var gravityVector = getGravityVector(earth.position, gravityValue);
+    earth.speed = addVector(earth.speed, gravityVector);
+    earth.position = addVector(earth.position, earth.speed);
+}
+
+function redrawSpace() {
+    if (!univers.drawPath) {
+        clearBackground();
+        drawPlanet(univers.sun);
+    }
+    moveEarth(univers.earth, univers.gravity);
+    drawPlanet(univers.earth);
+}
+
+function reconfigure() {
+    run = false;
+    var universTxt = document.getElementById("univers").value;
+    univers = eval(universTxt);
+    run = true;
+    clearBackground();
+    drawPlanet(univers.sun);
+    redraw();
+}
+
+function redraw() {
+    redrawSpace();
+    if (run) {
+        window.requestAnimationFrame(redraw);
+    }
+};
+
+</script>
+</body>
+
+</html>
