@@ -12,35 +12,32 @@
 <br />
 <div>
     <textarea id="univers" cols="40" rows="30">({
-    'gravity' : {
-        'r': 0.005,
-        'teta': Math.PI
-    },
-    'earth' : {
-        'size': 3,
-        'color': 'green',
-        'position': {
-            'r': 100,
-            'teta': 0
+        'gravity' : 1,
+        'earth' : {
+            'size': 3,
+            'color': 'green',
+            'position': {
+                'x': 100,
+                'y': 0
+            },
+            'speed': {
+                'x': 0,
+                'y': 5
+            }
         },
-        'speed': {
-            'r': 15,
-            'teta': -Math.PI/2
-        } // geo centric speed
-    },
-    'sun': {
-        'size': 20,
-        'color': 'yellow',
-        'position': {
-            'r': 0,
-            'teta': 0
-        },
-        'speed': {
-            'r': 0,
-            'teta': 0
+        'sun': {
+            'size': 20,
+            'color': 'yellow',
+            'position': {
+                'x': 0,
+                'y': 0
+            },
+            'speed': {
+                'x': 0,
+                'y': 0
+            }
         }
-    }
-})</textarea>
+    })</textarea>
 </div>
 
 <script>
@@ -53,32 +50,29 @@ ctx.translate(canvas.width / 2, canvas.height / 2);
 var run = true;
 
 var univers = {
-    'gravity' : {
-        'r': 0.005,
-        'teta': Math.PI
-    },
+    'gravity' : 1,
     'earth' : {
         'size': 3,
         'color': 'green',
         'position': {
-            'r': 100,
-            'teta': 0
+            'x': 100,
+            'y': 0
         },
         'speed': {
-            'r': 15,
-            'teta': -Math.PI/2
-        } // geo centric speed
+            'x': 0,
+            'y': 5
+        }
     },
     'sun': {
         'size': 20,
         'color': 'yellow',
         'position': {
-            'r': 0,
-            'teta': 0
+            'x': 0,
+            'y': 0
         },
         'speed': {
-            'r': 0,
-            'teta': 0
+            'x': 0,
+            'y': 0
         }
     }
 };
@@ -107,24 +101,22 @@ function drawCircle(x, y, r, color) {
 }
 
 function drawPlanet(astre) {
-    var coord = polarToRect(astre.position);
-    drawCircle(coord.x, coord.y, astre.size, astre.color);
+    drawCircle(astre.position.x, astre.position.y, astre.size, astre.color);
 }
 
-function addPolarVect(v1,v2) {
-    var s = polarToRect(v1);
-    var g = polarToRect(v2);
-    var newS = {x: s.x+g.x, y: s.y+g.y};
-    return rectToPolar(newS); 
+function addVector(v1,v2) {
+    return {x: v1.x+v2.x, y: v1.y+v2.y}; 
 }
 
-function addGravity(speed, gravity) {
-    return addPolarVect(speed, gravity); 
+function getGravityVector(astrePosition, gravityValue) {
+    var astreAngle = rectToPolar(astrePosition).teta;
+    return polarToRect({r: -gravityValue, teta: astreAngle});
 }
-function moveEarth(earth, gravity) {
-    earth.speed = addGravity(earth.speed, gravity);
-    var helioCentricSpeed = { r: earth.speed.r, teta: earth.speed.teta + earth.position.teta };
-    earth.position = addPolarVect(earth.position, helioCentricSpeed);
+
+function moveEarth(earth, gravityValue) {
+    var gravityVector = getGravityVector(earth.position, gravityValue);
+    earth.speed = addVector(earth.speed, gravityVector);
+    earth.position = addVector(earth.position, earth.speed);
 }
 
 function redrawSpace() {
