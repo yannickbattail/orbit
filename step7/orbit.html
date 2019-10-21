@@ -27,18 +27,18 @@
 
 <br />
 <div>
-    <!--
     <fieldset><legend>Rocket controls</legend>
         Engine: <button id="engine" onclick="turnOnEngine()" class="EngineOff">OFF</button>
+        Current speed: <input type="text" id="speedDisplay"  value="-" /><br />
+        
     </fieldset>
-    -->
     <fieldset><legend>Rocket</legend>
         Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateGrav()" /><br />
     </fieldset>
     <fieldset><legend>Inital parameters</legend>
         Gravity:        <input type="number"   id="gravity"  value="0.02"     step="0.01" min="0" /><br />
-        Orbit distance: <input type="number"   id="orbit"    value="150"      step="10"   min="1" /><br />
-        Inital speed:   <input type="number"   id="speed"    value="0.1"      step="0.1"  min="0.001" /><br />
+        Orbit distance: <input type="number"   id="orbit"    value="50"       step="10"   min="1" /><br />
+        Inital speed:   <input type="number"   id="speed"    value="0.05"     step="0.01"  min="0.001" /><br />
     </fieldset>
 </div>
 <br />
@@ -57,20 +57,22 @@ var univers = {
     'drawPath' : false,
     'gravity' : 0.02,
     'rocket' : {
-        'size': 3,
+        'size': 4,
         'color': 'white',
+        'engine' : false,
+        'accceleration' : 0.0001,
         'position': {
-            'x': 100,
+            'x': 50,
             'y': 0
         },
         'speed': {
-            'x': 0,
+            'x': -2,
             'y': 0.1
         }
     },
-    'sun': {
+    'earth': {
         'size': 20,
-        'color': 'yellow',
+        'color': 'Teal',
         'position': {
             'x': 0,
             'y': 0
@@ -109,17 +111,25 @@ function drawPlanet(astre) {
     drawCircle(astre.position.x, astre.position.y, astre.size, astre.color);
 }
 
-function drawRocket(astre) {
-    var polarspeed = rectToPolar(astre.speed);
+function drawRocket(rocket) {
+    var polarspeed = rectToPolar(rocket.speed);
     ctx.save();
-    ctx.translate(astre.position.x, astre.position.y);
+    ctx.translate(rocket.position.x, rocket.position.y);
     ctx.rotate(polarspeed.teta - Math.PI /2);
-    ctx.fillStyle = astre.color;
+    ctx.fillStyle = rocket.color;
     ctx.beginPath();
-    ctx.moveTo(0, 3*astre.size);
-    ctx.lineTo(1*astre.size, 0);
-    ctx.lineTo(-1*astre.size, 0);
+    ctx.moveTo(0, 3*rocket.size);
+    ctx.lineTo(1*rocket.size, 0);
+    ctx.lineTo(-1*rocket.size, 0);
     ctx.fill();
+    if (rocket.engine) {
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(1*rocket.size/2, -rocket.size*2);
+        ctx.lineTo(-1*rocket.size/2, -rocket.size*2);
+        ctx.fill();
+    }
     ctx.restore();
 }
 
@@ -132,30 +142,47 @@ function getGravityVector(astrePosition, gravityValue) {
     return polarToRect({r: -gravityValue * astrePolar.r * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
 }
 
+function getAcceleration(rocket) {
+    if (rocket.engine) {
+        var polarSpeed = rectToPolar(rocket.speed);
+        return polarToRect({r: rocket.accceleration, teta: polarSpeed.teta});
+    } else {
+        return {x: 0, y:0}; 
+    }
+}
+
 function moveRocket(rocket, gravityValue) {
     var gravityVector = getGravityVector(rocket.position, gravityValue);
     rocket.speed = addVector(rocket.speed, gravityVector);
+    var accelerationVector = getAcceleration(rocket);
+    rocket.speed = addVector(rocket.speed, accelerationVector);
     rocket.position = addVector(rocket.position, rocket.speed);
+}
+
+function showSpeed(speedVector) {
+    var speed = rectToPolar(speedVector);
+    document.getElementById("speedDisplay").value = speed.r.toFixed(3);
 }
 
 function redrawSpace() {
     if (!univers.drawPath) {
         clearBackground();
-        drawPlanet(univers.sun);
+        drawPlanet(univers.earth);
     }
     moveRocket(univers.rocket, univers.gravity);
     drawRocket(univers.rocket);
+    showSpeed(univers.rocket.speed);
 }
 function turnOnEngine() {
     var engine = document.getElementById("engine");
     if (engine.className == "EngineOff") {
         engine.className = "EngineOn";
         engine.innerHTML = "ON";
-
+        univers.rocket.engine = true;
     } else {
         engine.className = "EngineOff";
         engine.innerHTML = "OFF";
-
+        univers.rocket.engine = false;
     }
 }
 function updateGrav() {
@@ -165,12 +192,12 @@ function reconfigure() {
     run = false;
     univers.rocket.position.x = parseFloat(document.getElementById("orbit").value);
     univers.rocket.position.y = 0;
-    univers.rocket.speed.x = 0;
+    univers.rocket.speed.x = 0.1;
     univers.rocket.speed.y = parseFloat(document.getElementById("speed").value);
     univers.gravity = parseFloat(document.getElementById("gravity").value);
     run = true;
     clearBackground();
-    drawPlanet(univers.sun);
+    drawPlanet(univers.earth);
     redraw();
 }
 
