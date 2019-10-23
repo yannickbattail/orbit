@@ -166,6 +166,13 @@ function checkCrash(rocket, earth) {
         run = false;
         rocket.fuel = 0;
     }
+    if (rocket.position.x > canvas.width/2
+    || rocket.position.x < -canvas.width/2
+    || rocket.position.y >  canvas.height/2
+    || rocket.position.y < -canvas.height/2) {
+        run = false;
+        rocket.fuel = 0;
+    }
 }
 
 function getAcceleration(rocket) {
