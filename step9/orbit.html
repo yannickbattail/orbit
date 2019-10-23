@@ -151,12 +151,24 @@ function getGravityVector(astrePosition, gravityValue) {
     return polarToRect({r: -gravityValue * astrePolar.r * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
 }
 
-function getAcceleration(rocket) {
+function checkFuel(rocket) {
     if (rocket.fuel <= 0) {
         if (rocket.engine) {
             switchEngine();
         }
     }
+}
+
+function checkCrash(rocket, earth) {
+    var orbitMin = earth.size + rocket.size;
+    var position = rectToPolar(rocket.position);
+    if (position.r <= orbitMin) {
+        run = false;
+        rocket.fuel = 0;
+    }
+}
+
+function getAcceleration(rocket) {
     if (rocket.engine) {
         rocket.fuel--
         var polarSpeed = rectToPolar(rocket.speed);
@@ -166,7 +178,9 @@ function getAcceleration(rocket) {
     }
 }
 
-function moveRocket(rocket, gravityValue) {
+function moveRocket(rocket, earth, gravityValue) {
+    checkCrash(rocket, earth);
+    checkFuel(rocket);
     var gravityVector = getGravityVector(rocket.position, gravityValue);
     rocket.speed = addVector(rocket.speed, gravityVector);
     var accelerationVector = getAcceleration(rocket);
@@ -187,7 +201,7 @@ function redrawSpace() {
         clearBackground();
         drawPlanet(univers.earth);
     }
-    moveRocket(univers.rocket, univers.gravity);
+    moveRocket(univers.rocket, univers.earth, univers.gravity);
     drawRocket(univers.rocket);
     showCounters(univers.rocket);
 }
