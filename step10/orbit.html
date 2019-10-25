@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+      ----------------------------------------------------------------------------
+      "THE BEER-WARE LICENSE" (Revision 42):
+      <phk@FreeBSD.ORG> wrote this file.  As long as you retain this notice you
+      can do whatever you want with this stuff. If we meet some day, and you think
+      this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
+      ----------------------------------------------------------------------------
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>orbit</title>
+  <style>
+    .EngineOff {
+        border-style: outset;
+        background-color: darkred;
+    }
+    .EngineOn {
+        border-style: inset;
+        background-color: green;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="scene" width="300" height="300"></canvas>
+
+<br />
+<div>
+    <fieldset><legend>Rocket controls</legend>
+        Engine: <button id="engine" onclick="switchEngine()" class="EngineOff">OFF</button> or press key [F]<br />
+        Current speed: <input type="text" id="speedDisplay"  value="-" /><br />
+        Distance from earth: <input type="text" id="DistanceEarth"  value="-" /><br />
+        Fuel: <input type="text" id="fuel"  value="-" /><br />
+    </fieldset>
+    <fieldset><legend>Rocket</legend>
+        Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateGrav()" /><br />
+    </fieldset>
+    <fieldset><legend>Inital parameters</legend>
+        Gravity:        <input type="number"   id="gravity"  value="0.02"     step="0.01" min="0" /><br />
+        Orbit distance: <input type="number"   id="orbit"    value="50"       step="10"   min="1" /><br />
+        Inital speed:   <input type="number"   id="speed"    value="0.05"     step="0.01"  min="0.001" /><br />
+    </fieldset>
+</div>
+<br />
+<button onclick="reconfigure()">restart</button>
+
+<script>
+
+var canvas = document.getElementById('scene');
+var ctx = canvas.getContext('2d');
+// set origin to center
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
+var run = true;
+
+var univers = {
+    'drawPath' : false,
+    'gravity' : 0.02,
+    'rocket' : {
+        'size': 4,
+        'color': 'white',
+        'engine' : false,
+        'accceleration' : 0.0001,
+        'fuel' : 2000,
+        'position': {
+            'x': 50,
+            'y': 0
+        },
+        'speed': {
+            'x': -2,
+            'y': 0.1
+        }
+    },
+    'earth': {
+        'size': 20,
+        'color': 'SeaGreen',
+        'position': {
+            'x': 0,
+            'y': 0
+        },
+        'speed': {
+            'x': 0,
+            'y': 0
+        }
+    }
+};
+
+function polarToRect(coord) {
+    var x1 = coord.r * Math.cos(coord.teta);
+    var y1 = coord.r * Math.sin(coord.teta);
+    return {x: x1, y: y1};
+}
+function rectToPolar(coord){
+    distance = Math.sqrt(coord.x*coord.x + coord.y*coord.y);
+    radians = Math.atan2(coord.y, coord.x);
+    return { r: distance, teta: radians };
+}
+
+function clearBackground() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+}
+function drawCircle(x, y, r, color) {
+    var gradient = ctx.createRadialGradient(x-3, y-3, 1, x, y, r);
+    gradient.addColorStop(0, '#6cb6ff');
+    gradient.addColorStop(1, '#00006f');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawPlanet(astre) {
+    drawCircle(astre.position.x, astre.position.y, astre.size, astre.color);
+}
+
+function drawRocket(rocket) {
+    var polarspeed = rectToPolar(rocket.speed);
+    ctx.save();
+    ctx.translate(rocket.position.x, rocket.position.y);
+    ctx.rotate(polarspeed.teta - Math.PI /2);
+    ctx.fillStyle = rocket.color;
+    ctx.beginPath();
+    ctx.moveTo(0, 3*rocket.size);
+    ctx.lineTo(1*rocket.size, 0);
+    ctx.lineTo(-1*rocket.size, 0);
+    ctx.fill();
+    drawEngineFire(rocket);
+    ctx.restore();
+}
+
+function drawEngineFire(rocket) {
+    if (rocket.engine) {
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(1*rocket.size/2, -rocket.size*2);
+        ctx.lineTo(-1*rocket.size/2, -rocket.size*2);
+        ctx.fill();
+    }
+}
+
+
+function addVector(v1,v2) {
+    return {x: v1.x+v2.x, y: v1.y+v2.y}; 
+}
+
+function getGravityVector(astrePosition, gravityValue) {
+    var astrePolar = rectToPolar(astrePosition);
+    return polarToRect({r: -gravityValue * astrePolar.r * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
+}
+
+function checkFuel(rocket) {
+    if (rocket.fuel <= 0) {
+        if (rocket.engine) {
+            switchEngine();
+        }
+    }
+}
+
+function checkCrash(rocket, earth) {
+    var orbitMin = earth.size + rocket.size;
+    var position = rectToPolar(rocket.position);
+    if (position.r <= orbitMin) {
+        run = false;
+        rocket.fuel = 0;
+    }
+    if (rocket.position.x > canvas.width/2
+    || rocket.position.x < -canvas.width/2
+    || rocket.position.y >  canvas.height/2
+    || rocket.position.y < -canvas.height/2) {
+        run = false;
+        rocket.fuel = 0;
+    }
+}
+
+function getAcceleration(rocket) {
+    if (rocket.engine) {
+        rocket.fuel--
+        var polarSpeed = rectToPolar(rocket.speed);
+        return polarToRect({r: rocket.accceleration, teta: polarSpeed.teta});
+    } else {
+        return {x: 0, y:0}; 
+    }
+}
+
+function moveRocket(rocket, earth, gravityValue) {
+    checkCrash(rocket, earth);
+    checkFuel(rocket);
+    var gravityVector = getGravityVector(rocket.position, gravityValue);
+    rocket.speed = addVector(rocket.speed, gravityVector);
+    var accelerationVector = getAcceleration(rocket);
+    rocket.speed = addVector(rocket.speed, accelerationVector);
+    rocket.position = addVector(rocket.position, rocket.speed);
+}
+
+function showCounters(rocket) {
+    var speed = rectToPolar(rocket.speed);
+    document.getElementById("speedDisplay").value = speed.r.toFixed(3);
+    var position = rectToPolar(rocket.position);
+    document.getElementById("DistanceEarth").value = position.r.toFixed(0);
+    document.getElementById("fuel").value = rocket.fuel;
+}
+
+function redrawSpace() {
+    if (!univers.drawPath) {
+        clearBackground();
+        drawPlanet(univers.earth);
+    }
+    moveRocket(univers.rocket, univers.earth, univers.gravity);
+    drawRocket(univers.rocket);
+    showCounters(univers.rocket);
+}
+function switchEngine() {
+    var engine = document.getElementById("engine");
+    if (univers.rocket.engine) {
+        engine.className = "EngineOff";
+        engine.innerHTML = "OFF";
+        univers.rocket.engine = false;
+    } else {
+        engine.className = "EngineOn";
+        engine.innerHTML = "ON";
+        univers.rocket.engine = true;
+    }
+}
+function updateGrav() {
+    univers.drawPath = document.getElementById("drawPath").checked;
+}
+function reconfigure() {
+    run = false;
+    univers.rocket.position.x = parseFloat(document.getElementById("orbit").value);
+    univers.rocket.position.y = 0;
+    univers.rocket.speed.x = 0.1;
+    univers.rocket.speed.y = parseFloat(document.getElementById("speed").value);
+    univers.rocket.engine = true;
+    switchEngine();
+    univers.rocket.fuel = 2000;
+
+    univers.gravity = parseFloat(document.getElementById("gravity").value);
+    run = true;
+    clearBackground();
+    drawPlanet(univers.earth);
+    redraw();
+}
+
+function redraw() {
+    redrawSpace();
+    if (run) {
+        window.requestAnimationFrame(redraw);
+    }
+};
+
+reconfigure();
+redraw();
+
+window.addEventListener("keydown", function(event) {
+    if (event.defaultPrevented) {
+        return; // Do nothing if event already handled
+    }
+
+    if(event.code === "KeyF") {
+        switchEngine();
+    }
+});
+
+</script>
+</body>
+
+</html>
