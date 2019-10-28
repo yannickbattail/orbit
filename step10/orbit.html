@@ -29,23 +29,24 @@
 
 <br />
 <div>
-    <fieldset><legend>Rocket controls</legend>
-        Engine: <button id="engine" onclick="switchEngine()" class="EngineOff">OFF</button> or press key [F]<br />
+    <fieldset><legend>Rocket info</legend>
         Current speed: <input type="text" id="speedDisplay"  value="-" /><br />
+        Current gravity: <input type="text" id="gravityDisplay"  value="-" />&nbsp;<span style="background-color: darkgreen;">&nbsp;&nbsp;&nbsp;</span><span style="background-color: black;">&nbsp;&nbsp;&nbsp;</span><br />
         Distance from earth: <input type="text" id="DistanceEarth"  value="-" /><br />
         Fuel: <input type="text" id="fuel"  value="-" /><br />
     </fieldset>
-    <fieldset><legend>Rocket</legend>
+    <fieldset><legend>Rocket controls</legend>
+        Engine: <button id="engine" onclick="switchEngine()" class="EngineOff">OFF</button> or press key [F]<br />
         Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateGrav()" /><br />
     </fieldset>
     <fieldset><legend>Inital parameters</legend>
         Gravity:        <input type="number"   id="gravity"  value="1"     step="0.01" min="0" /><br />
         Orbit distance: <input type="number"   id="orbit"    value="50"       step="10"   min="1" /><br />
         Inital speed:   <input type="number"   id="speed"    value="0.05"     step="0.01"  min="0.001" /><br />
+        <button onclick="reconfigure()">restart</button>
     </fieldset>
 </div>
 <br />
-<button onclick="reconfigure()">restart</button>
 
 <script>
 
@@ -100,7 +101,10 @@ function rectToPolar(coord){
 }
 
 function clearBackground() {
-    ctx.fillStyle = 'black';
+    var gradient = ctx.createRadialGradient(0, 0, univers.earth.size, 0, 0, canvas.height/2);
+    gradient.addColorStop(0, 'darkgreen');
+    gradient.addColorStop(1, 'black');
+    ctx.fillStyle = gradient;
     ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
 }
 function drawCircle(x, y, r, color) {
@@ -151,7 +155,7 @@ function addVector(v1,v2) {
 
 function getGravityVector(astrePosition, gravityValue) {
     var astrePolar = rectToPolar(astrePosition);
-    return polarToRect({r: -gravityValue * /*astrePolar.r * */ 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
+    return polarToRect({r: -gravityValue * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
 }
 
 function checkFuel(rocket) {
@@ -198,9 +202,11 @@ function moveRocket(rocket, earth, gravityValue) {
     rocket.position = addVector(rocket.position, rocket.speed);
 }
 
-function showCounters(rocket) {
+function showCounters(rocket, gravityValue) {
     var speed = rectToPolar(rocket.speed);
     document.getElementById("speedDisplay").value = speed.r.toFixed(3);
+    var polarGravity = rectToPolar(getGravityVector(rocket.position, gravityValue));
+    document.getElementById("gravityDisplay").value = polarGravity.r.toFixed(5);
     var position = rectToPolar(rocket.position);
     document.getElementById("DistanceEarth").value = position.r.toFixed(0);
     document.getElementById("fuel").value = rocket.fuel;
@@ -213,7 +219,7 @@ function redrawSpace() {
     }
     moveRocket(univers.rocket, univers.earth, univers.gravity);
     drawRocket(univers.rocket);
-    showCounters(univers.rocket);
+    showCounters(univers.rocket, univers.gravity);
 }
 function switchEngine() {
     var engine = document.getElementById("engine");
