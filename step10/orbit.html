@@ -39,7 +39,7 @@
         Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateGrav()" /><br />
     </fieldset>
     <fieldset><legend>Inital parameters</legend>
-        Gravity:        <input type="number"   id="gravity"  value="0.02"     step="0.01" min="0" /><br />
+        Gravity:        <input type="number"   id="gravity"  value="1"     step="0.01" min="0" /><br />
         Orbit distance: <input type="number"   id="orbit"    value="50"       step="10"   min="1" /><br />
         Inital speed:   <input type="number"   id="speed"    value="0.05"     step="0.01"  min="0.001" /><br />
     </fieldset>
@@ -58,9 +58,9 @@ var run = true;
 
 var univers = {
     'drawPath' : false,
-    'gravity' : 0.02,
+    'gravity' : 1,
     'rocket' : {
-        'size': 4,
+        'size': 3,
         'color': 'white',
         'engine' : false,
         'accceleration' : 0.0001,
@@ -125,7 +125,7 @@ function drawRocket(rocket) {
     ctx.rotate(polarspeed.teta - Math.PI /2);
     ctx.fillStyle = rocket.color;
     ctx.beginPath();
-    ctx.moveTo(0, 3*rocket.size);
+    ctx.moveTo(0, 4*rocket.size);
     ctx.lineTo(1*rocket.size, 0);
     ctx.lineTo(-1*rocket.size, 0);
     ctx.fill();
@@ -151,7 +151,7 @@ function addVector(v1,v2) {
 
 function getGravityVector(astrePosition, gravityValue) {
     var astrePolar = rectToPolar(astrePosition);
-    return polarToRect({r: -gravityValue * astrePolar.r * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
+    return polarToRect({r: -gravityValue * /*astrePolar.r * */ 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
 }
 
 function checkFuel(rocket) {
