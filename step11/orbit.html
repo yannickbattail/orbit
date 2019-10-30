@@ -40,7 +40,7 @@
         Turning: <button id="turnLeft"  class="EngineOff">Left</button>
                  <button id="turnRight" class="EngineOff">Right</button>
                  key [D], key [G]<br />
-        Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateDrawPath()" /> key [V]<br />
+        Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateDrawPath()" /> key [T]<br />
         <button id="engine" onclick="reconfigure()" >(Re)start</button> key [R]<br />
     </fieldset>
 </div>
@@ -306,7 +306,7 @@ window.addEventListener("keydown", function(event) {
     if(event.code === "KeyG") {
         turn(1);
     }
-    if(event.code === "KeyV") {
+    if(event.code === "KeyT") {
         document.getElementById("drawPath").checked = !document.getElementById("drawPath").checked;
         updateDrawPath();
     }
