@@ -21,6 +21,14 @@
         border-style: inset;
         background-color: green;
     }
+    .stay {
+        border-style: outset;
+        background-color: darkgray;
+    }
+    .turn {
+        border-style: inset;
+        background-color: lightgray;
+    }
   </style>
 </head>
 <body>
@@ -37,8 +45,8 @@
     </fieldset>
     <fieldset><legend>Rocket controls</legend>
         Engine: <button id="engine" onclick="switchEngine()" class="EngineOff">OFF</button> or press key [F] to switch.<br />
-        Turning: <button id="turnLeft"  class="EngineOff">Left</button>
-                 <button id="turnRight" class="EngineOff">Right</button>
+        Turning: <button id="turnLeft"  class="stay">Left</button>
+                 <button id="turnRight" class="stay">Right</button>
                  key [D], key [G]<br />
         Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateDrawPath()" /> key [T]<br />
         <button id="engine" onclick="reconfigure()" >(Re)start</button> key [R]<br />
@@ -247,14 +255,14 @@ function turn(sens) {
     var turnRight = document.getElementById("turnRight");
     univers.rocket.turning = sens;
     if (univers.rocket.turning == -1) {
-        turnLeft.className = "EngineOn";
-        engine.className = "EngineOff";
+        turnLeft.className = "turn";
+        engine.className = "stay";
     } else if (univers.rocket.turning == 1) {
-        turnLeft.className = "EngineOff";
-        turnRight.className = "EngineOn";
+        turnLeft.className = "stay";
+        turnRight.className = "turn";
     } else {
-        turnLeft.className = "EngineOff";
-        turnRight.className = "EngineOff";
+        turnLeft.className = "stay";
+        turnRight.className = "stay";
     }
 }
 
@@ -332,17 +340,17 @@ window.addEventListener("keyup", function(event) {
 });
 
 var turnLeft = document.getElementById("turnLeft");
-turnLeft.addEventListener('onpointerdown', function(event){
+turnLeft.addEventListener('pointerdown', function(event){
     turn(-1);
 });
-turnLeft.addEventListener('onpointerup', function(event){
+turnLeft.addEventListener('pointerup', function(event){
     turn(0);
 });
 var turnRight = document.getElementById("turnRight");
-turnRight.addEventListener('onpointerdown', function(event){
+turnRight.addEventListener('pointerdown', function(event){
     turn(1);
 });
-turnRight.addEventListener('onpointerup', function(event){
+turnRight.addEventListener('pointerup', function(event){
     turn(0);
 });
 </script>
