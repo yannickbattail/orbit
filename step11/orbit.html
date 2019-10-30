@@ -332,17 +332,17 @@ window.addEventListener("keyup", function(event) {
 });
 
 var turnLeft = document.getElementById("turnLeft");
-turnLeft.addEventListener('mousedown', function(event){
+turnLeft.addEventListener('onpointerdown', function(event){
     turn(-1);
 });
-turnLeft.addEventListener('mouseup', function(event){
+turnLeft.addEventListener('onpointerup', function(event){
     turn(0);
 });
 var turnRight = document.getElementById("turnRight");
-turnRight.addEventListener('mousedown', function(event){
+turnRight.addEventListener('onpointerdown', function(event){
     turn(1);
 });
-turnRight.addEventListener('mouseup', function(event){
+turnRight.addEventListener('onpointerup', function(event){
     turn(0);
 });
 </script>
