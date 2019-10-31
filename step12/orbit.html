@@ -44,7 +44,8 @@
 <div>
     <fieldset><legend>Rocket info</legend>
         Current speed: <input type="text" id="speedDisplay"  value="-" /><br />
-        Current gravity: <input type="text" id="gravityDisplay"  value="-" />&nbsp;<span style="background-color: darkgreen;">&nbsp;&nbsp;&nbsp;</span><span style="background-color: black;">&nbsp;&nbsp;&nbsp;</span><br />
+        Current gravity: <input type="text" id="gravityDisplay"  value="-" />
+        &nbsp;<span style="background-color: darkcyan;">&nbsp;&nbsp;&nbsp;</span><span style="background-color: black;">&nbsp;&nbsp;&nbsp;</span><br />
         Distance from earth: <input type="text" id="DistanceEarth"  value="-" /><br />
         Fuel: <input type="text" id="fuel"  value="-" /><br />
     </fieldset>
@@ -97,7 +98,7 @@ var univers = {
     },
     'earth': {
         'size': 20,
-        'color': 'SeaGreen',
+        'color': '#6cb6ff',
         'position': {
             'x': 0,
             'y': 0
@@ -129,7 +130,7 @@ function clearBackground() {
 }
 function drawCircle(x, y, r, color) {
     var gradient = ctx.createRadialGradient(x-3, y-3, 1, x, y, r);
-    gradient.addColorStop(0, '#6cb6ff');
+    gradient.addColorStop(0, color);
     gradient.addColorStop(1, '#00006f');
     ctx.fillStyle = gradient;
     ctx.beginPath();
@@ -140,10 +141,8 @@ function drawCircle(x, y, r, color) {
 function drawImage(imageId, x, y) {
     var earthImg = document.getElementById(imageId);
     ctx.drawImage(earthImg,
-     0, 0,
-     earthImg.width, earthImg.height,
-     -earthImg.width/2, -earthImg.height/2,
-     earthImg.width, earthImg.height);
+      -earthImg.width/2, -earthImg.height/2,
+      earthImg.width, earthImg.height);
 }
 function drawEarth(earth) {
     //drawCircle(earth.position.x, earth.position.y, earth.size, earth.color);
@@ -163,7 +162,7 @@ function drawRocket(rocket) {
     ctx.lineTo(-1*rocket.size, 0);
     ctx.fill();
     */
-    drawImage('rocket', 0, 0);
+    drawImage(run?'rocket':'explosion', 0, 0);
     drawEngineFire(rocket);
     ctx.restore();
 }
@@ -198,14 +197,11 @@ function checkFuel(rocket) {
 function checkCrash(rocket, earth) {
     var orbitMin = earth.size + rocket.size;
     var position = rectToPolar(rocket.position);
-    if (position.r <= orbitMin) {
-        run = false;
-        rocket.fuel = 0;
-    }
-    if (rocket.position.x > canvas.width/2
-    || rocket.position.x < -canvas.width/2
-    || rocket.position.y >  canvas.height/2
-    || rocket.position.y < -canvas.height/2) {
+    if (position.r <= orbitMin // crash on earth
+    || rocket.position.x >= canvas.width/2 // crash outside of screen
+    || rocket.position.x <= -canvas.width/2
+    || rocket.position.y >=  canvas.height/2
+    || rocket.position.y <= -canvas.height/2) {
         run = false;
         rocket.fuel = 0;
     }
@@ -319,7 +315,6 @@ function redraw() {
 };
 
 reconfigure();
-redraw();
 
 window.addEventListener("keydown", function(event) {
     if (event.defaultPrevented) {
