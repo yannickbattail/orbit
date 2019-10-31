@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+        ----------------------------------------------------------------------------
+        "THE BEER-WARE LICENSE" (Revision 42):
+        <phk@FreeBSD.ORG> wrote this file.  As long as you retain this notice you
+        can do whatever you want with this stuff. If we meet some day, and you think
+        this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
+        ----------------------------------------------------------------------------
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" 
+        href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AABm/wCZmZkAAJn/AADM/wDMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFRAAAAAAAAFFQQAAAAAAAUVBAAAAAAAAAAAAAAAAAAA2MAAAAAAAADYwAAAAAABgNjBgAAAAAAA2MAAAAAAAADYwAAAAAAAANjAAAAAAAAA2MAAAAAAAADYwAAAAAAAAAAAAAAAAAAASEAAAAAAAAAIAAAAAAAAAAAAAAAD8fwAA+D8AAPg/AAD8fwAA+D8AAMAHAADgDwAA8B8AAPg/AAD4PwAA+D8AAPg/AAD4PwAA+D8AAPx/AAD+/wAA" />
+    <title>orbit</title>
+    <style>
+    .EngineOff {
+        border-style: outset;
+        background-color: darkred;
+    }
+    .EngineOn {
+        border-style: inset;
+        background-color: green;
+    }
+    .stay {
+        border-style: outset;
+        background-color: darkgray;
+    }
+    .turn {
+        border-style: inset;
+        background-color: lightgray;
+    }
+    .sprites {
+        display: none;
+    }
+    </style>
+</head>
+<body>
+
+<canvas id="scene" width="300" height="300"></canvas>
+
+<br />
+<div>
+    <fieldset><legend>Rocket info</legend>
+        Current speed: <input type="text" id="speedDisplay"  value="-" /><br />
+        Current gravity: <input type="text" id="gravityDisplay"  value="-" />&nbsp;<span style="background-color: darkgreen;">&nbsp;&nbsp;&nbsp;</span><span style="background-color: black;">&nbsp;&nbsp;&nbsp;</span><br />
+        Distance from earth: <input type="text" id="DistanceEarth"  value="-" /><br />
+        Fuel: <input type="text" id="fuel"  value="-" /><br />
+    </fieldset>
+    <fieldset><legend>Rocket controls</legend>
+        Engine: <button id="engine" onclick="switchEngine()" class="EngineOff">OFF</button> or press key [F] to switch.<br />
+        Turning: <button id="turnLeft"  class="stay">Left</button>
+                 <button id="turnRight" class="stay">Right</button>
+                 key [D], key [G]<br />
+        Draw rocket path:      <input type="checkbox" id="drawPath" value="1"    onchange="updateDrawPath()" /> key [T]<br />
+        <button id="engine" onclick="reconfigure()" >(Re)start</button> key [R]<br />
+    </fieldset>
+</div>
+<br />
+<img id="explosion" class="sprites"
+ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcBAMAAACAI8KnAAAAFVBMVEU0bAD6AAD6YAj/lw//vgrm/wj///96ZCqfAAAAAXRSTlMAQObYZgAAAKdJREFUGNNlUcENwyAMtDew3QkMygAlYoGoE4QmG8D+I/SIVFVx74OOuwN8EF0Qph+EVb8bQsTqpnMFZWEzc3dhmRRKAuCYlB6aSi456fMK657WVte0KF3mJdfaWtmnmdlSO4CaXMDNcj3P3t+b+4zm9ehjnMdrQxheiGNAhpvUER0AwqZQEZ20twI10D/z7ahwUXhGfOR9hDhgGD+UE6oLxYbab5/yAYvTNSH7RNf4AAAAAElFTkSuQmCC" />
+<img id="rocket" class="sprites"
+ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAARBAMAAAD5z0voAAAAIVBMVEUAAAAwMDC0OL8AAAAAAACZmZnMzMz/AAD/mQD/zAD/ZgA8TFO+AAAAAXRSTlMAQObYZgAAADRJREFUCNdjYMALXBxAJEtYCIjtEhYC5LOkhIWkgLhhIQ5wORyUiwuYqioBG+YFNoyBBYgBH7MKUa2viCQAAAAASUVORK5CYII=" />
+<img id="earth" class="sprites"
+ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAh1BMVEUAAAAAAAAAZgAAADMAAAAAAGYAMwBmZjNmZmYzAMwAM5kzmTP/zJmZzGYAAMwzMwBmmWaZzDMAAJmZmZkAM8wAZjMAMzNmZpmZmczMzGaZmWYzM5kzMzMAM2bMzJkzZmZmmTOZZmYAZmYzZjMzZpn/zGZmMzOZmTNmmZlmzGbMzMxmMwD/zMwCEFx3AAAAAXRSTlMAQObYZgAAATlJREFUOMut1NdugzAUgOFwLDwA2+wSRgnZ6/2frz4x6YxaQ/pL3H3IsuF4sXgizrPs/yAfq6o/sBNkTOv9vu85j+OmUep4jONnICEItaYmgCAAyPPYFIbzIDLGLhfGAJApE4zNh8OgdV2vVgBNIwRAGD6gjpAQu3RdA3QdLi1EUTwLNxvGytL3g2C7zXMh8IAA+n69TpJ36gjJrbLUmhDfT1NkdukwFKLrTicpp0HPs5RShFians+vpuVSqcCUJHOg533AqopMS9P1GkV5Pm7GGeJ2PA8hPgizLIrkLXxBiE8HPglajHAYDgf8OZJEyt1OqekQN3TPbqgscSAolXI8mtmQjPk+pXbMvg2XM7zT+5HjZyyKH6M1CVratl/hw7vHGWJty/nLrar69X50hliWce50hzvDh70BGEcolXXRDdgAAAAASUVORK5CYII=" />
+<script language="javascript">
+
+var canvas = document.getElementById('scene');
+var ctx = canvas.getContext('2d');
+// set origin to center
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
+var run = false;
+
+var univers = {
+    'drawPath' : false,
+    'gravity' : 1,
+    'rocket' : {
+        'size': 3,
+        'color': 'white',
+        'engine' : true,
+        'turning' : 0, // values: -1, 0, 1
+        'acceleration' : {
+            r: 0.0004,
+            teta: 0
+        },
+        'fuel' : 2000,
+        'position': {
+            'x': 50,
+            'y': 0
+        },
+        'speed': {
+            'x': -2,
+            'y': 0
+        }
+    },
+    'earth': {
+        'size': 20,
+        'color': 'SeaGreen',
+        'position': {
+            'x': 0,
+            'y': 0
+        },
+        'speed': {
+            'x': 0,
+            'y': 0
+        }
+    }
+};
+
+function polarToRect(coord) {
+    var x1 = coord.r * Math.cos(coord.teta);
+    var y1 = coord.r * Math.sin(coord.teta);
+    return {x: x1, y: y1};
+}
+function rectToPolar(coord){
+    distance = Math.sqrt(coord.x*coord.x + coord.y*coord.y);
+    radians = Math.atan2(coord.y, coord.x);
+    return { r: distance, teta: radians };
+}
+
+function clearBackground() {
+    var gradient = ctx.createRadialGradient(0, 0, univers.earth.size, 0, 0, canvas.height/2);
+    gradient.addColorStop(0, 'darkcyan');
+    gradient.addColorStop(1, 'black');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+}
+function drawCircle(x, y, r, color) {
+    var gradient = ctx.createRadialGradient(x-3, y-3, 1, x, y, r);
+    gradient.addColorStop(0, '#6cb6ff');
+    gradient.addColorStop(1, '#00006f');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+}
+function drawImage(imageId, x, y) {
+    var earthImg = document.getElementById(imageId);
+    ctx.drawImage(earthImg,
+     0, 0,
+     earthImg.width, earthImg.height,
+     -earthImg.width/2, -earthImg.height/2,
+     earthImg.width, earthImg.height);
+}
+function drawEarth(earth) {
+    //drawCircle(earth.position.x, earth.position.y, earth.size, earth.color);
+    drawImage('earth', earth.position.x, earth.position.y);
+}
+
+function drawRocket(rocket) {
+    var polarspeed = rectToPolar(rocket.speed);
+    ctx.save();
+    ctx.translate(rocket.position.x, rocket.position.y);
+    ctx.rotate(rocket.acceleration.teta-Math.PI/2);
+    /*
+    ctx.fillStyle = rocket.color;
+    ctx.beginPath();
+    ctx.moveTo(0, 4*rocket.size);
+    ctx.lineTo(1*rocket.size, 0);
+    ctx.lineTo(-1*rocket.size, 0);
+    ctx.fill();
+    */
+    drawImage('rocket', 0, 0);
+    drawEngineFire(rocket);
+    ctx.restore();
+}
+
+function drawEngineFire(rocket) {
+    if (rocket.engine) {
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(1*rocket.size/2, -rocket.size*2);
+        ctx.lineTo(-1*rocket.size/2, -rocket.size*2);
+        ctx.fill();
+    }
+}
+
+
+function addVector(v1,v2) {
+    return {x: v1.x+v2.x, y: v1.y+v2.y}; 
+}
+
+function getGravityVector(astrePosition, gravityValue) {
+    var astrePolar = rectToPolar(astrePosition);
+    return polarToRect({r: -gravityValue * 1/Math.pow(astrePolar.r, 2), teta: astrePolar.teta});
+}
+
+function checkFuel(rocket) {
+    if (rocket.fuel <= 0) {
+        switchEngine(false);
+    }
+}
+
+function checkCrash(rocket, earth) {
+    var orbitMin = earth.size + rocket.size;
+    var position = rectToPolar(rocket.position);
+    if (position.r <= orbitMin) {
+        run = false;
+        rocket.fuel = 0;
+    }
+    if (rocket.position.x > canvas.width/2
+    || rocket.position.x < -canvas.width/2
+    || rocket.position.y >  canvas.height/2
+    || rocket.position.y < -canvas.height/2) {
+        run = false;
+        rocket.fuel = 0;
+    }
+}
+
+function getAcceleration(rocket) {
+    if (rocket.engine) {
+        rocket.fuel--;
+        return polarToRect(rocket.acceleration);
+    } else {
+        return {x: 0, y:0}; 
+    }
+}
+
+function turnRocket(rocket) {
+    if (rocket.turning != 0) {
+        rocket.acceleration.teta += rocket.turning * Math.PI/400;
+    }
+}
+
+function moveRocket(rocket, earth, gravityValue) {
+    checkCrash(rocket, earth);
+    checkFuel(rocket);
+    turnRocket(rocket);
+    var gravityVector = getGravityVector(rocket.position, gravityValue);
+    rocket.speed = addVector(rocket.speed, gravityVector);
+    var accelerationVector = getAcceleration(rocket);
+    rocket.speed = addVector(rocket.speed, accelerationVector);
+    rocket.position = addVector(rocket.position, rocket.speed);
+}
+
+function showCounters(rocket, gravityValue) {
+    var speed = rectToPolar(rocket.speed);
+    document.getElementById("speedDisplay").value = speed.r.toFixed(3);
+    var polarGravity = rectToPolar(getGravityVector(rocket.position, gravityValue));
+    document.getElementById("gravityDisplay").value = polarGravity.r.toFixed(5);
+    var position = rectToPolar(rocket.position);
+    document.getElementById("DistanceEarth").value = position.r.toFixed(0);
+    document.getElementById("fuel").value = rocket.fuel;
+}
+
+function redrawSpace() {
+    if (!univers.drawPath) {
+        clearBackground();
+        drawEarth(univers.earth);
+    }
+    moveRocket(univers.rocket, univers.earth, univers.gravity);
+    drawRocket(univers.rocket);
+    showCounters(univers.rocket, univers.gravity);
+}
+function switchEngine(sens) {
+    if (sens === undefined) {
+        univers.rocket.engine = !univers.rocket.engine;
+    } else {
+        univers.rocket.engine = sens;
+    }
+    var engine = document.getElementById("engine");
+    if (univers.rocket.engine) {
+        engine.className = "EngineOn";
+        engine.innerHTML = "ON";
+    } else {
+        engine.className = "EngineOff";
+        engine.innerHTML = "OFF";
+    }
+}
+function turn(sens) {
+    var turnLeft = document.getElementById("turnLeft");
+    var turnRight = document.getElementById("turnRight");
+    univers.rocket.turning = sens;
+    if (univers.rocket.turning == -1) {
+        turnLeft.className = "turn";
+        engine.className = "stay";
+    } else if (univers.rocket.turning == 1) {
+        turnLeft.className = "stay";
+        turnRight.className = "turn";
+    } else {
+        turnLeft.className = "stay";
+        turnRight.className = "stay";
+    }
+}
+
+function updateDrawPath() {
+    univers.drawPath = document.getElementById("drawPath").checked;
+}
+function reconfigure() {
+    run = false;
+    univers.rocket.acceleration = {
+        r: 0.0005,
+        teta: -Math.PI/2
+    },
+    univers.rocket.position = {
+        x: 0,
+        y: -50
+    };
+    var accelerationRect = polarToRect(univers.rocket.acceleration);
+    univers.rocket.speed.x = accelerationRect.x;
+    univers.rocket.speed.y = accelerationRect.y;
+    univers.rocket.fuel = 1000;
+    switchEngine(true)
+    run = true;
+    clearBackground();
+    drawEarth(univers.earth);
+    redraw();
+}
+
+function redraw() {
+    redrawSpace();
+    if (run) {
+        window.requestAnimationFrame(redraw);
+    }
+};
+
+reconfigure();
+redraw();
+
+window.addEventListener("keydown", function(event) {
+    if (event.defaultPrevented) {
+        return; // Do nothing if event already handled
+    }
+
+    if(event.code === "KeyF") {
+        switchEngine(true);
+    }
+    if(event.code === "KeyD") {
+        turn(-1);
+    }
+    if(event.code === "KeyG") {
+        turn(1);
+    }
+    if(event.code === "KeyT") {
+        document.getElementById("drawPath").checked = !document.getElementById("drawPath").checked;
+        updateDrawPath();
+    }
+    if(event.code === "KeyR") {
+        reconfigure()
+    }
+});
+
+window.addEventListener("keyup", function(event) {
+    if (event.defaultPrevented) {
+        return; // Do nothing if event already handled
+    }
+
+    if(event.code === "KeyF") {
+        switchEngine(false);
+    }
+    if(event.code === "KeyD") {
+        turn(0);
+    }
+    if(event.code === "KeyG") {
+        turn(0);
+    }
+});
+
+var turnLeft = document.getElementById("turnLeft");
+turnLeft.addEventListener('pointerdown', function(event){
+    turn(-1);
+});
+turnLeft.addEventListener('pointerup', function(event){
+    turn(0);
+});
+var turnRight = document.getElementById("turnRight");
+turnRight.addEventListener('pointerdown', function(event){
+    turn(1);
+});
+turnRight.addEventListener('pointerup', function(event){
+    turn(0);
+});
+</script>
+</body>
+
+</html>
