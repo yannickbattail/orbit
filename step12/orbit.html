@@ -12,7 +12,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" 
-        href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AABm/wCZmZkAAJn/AADM/wDMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFRAAAAAAAAFFQQAAAAAAAUVBAAAAAAAAAAAAAAAAAAA2MAAAAAAAADYwAAAAAABgNjBgAAAAAAA2MAAAAAAAADYwAAAAAAAANjAAAAAAAAA2MAAAAAAAADYwAAAAAAAAAAAAAAAAAAASEAAAAAAAAAIAAAAAAAAAAAAAAAD8fwAA+D8AAPg/AAD8fwAA+D8AAMAHAADgDwAA8B8AAPg/AAD4PwAA+D8AAPg/AAD4PwAA+D8AAPx/AAD+/wAA" />
+        href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AABm/wCZmZkAAJn/AADM/wDMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAFRAAAAAAAAFFQQAAAAAAAUVBAAAAAAAAAAAAAAAAAAA2MAAAAAAAADYwAAAAAABgNjBgAA
+        AAAAA2MAAAAAAAADYwAAAAAAAANjAAAAAAAAA2MAAAAAAAADYwAAAAAAAAAAAAAAAAAAASEAAAAAAAAAIAAAAAAAAAA
+        AAAAAD8fwAA+D8AAPg/AAD8fwAA+D8AAMAHAADgDwAA8B8AAPg/AAD4PwAA+D8AAPg/AAD4PwAA+D8AAPx/AAD+/wAA" />
     <title>orbit</title>
     <style>
     .EngineOff {
@@ -60,11 +64,25 @@
 </div>
 <br />
 <img id="explosion" class="sprites"
- src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcBAMAAACAI8KnAAAAFVBMVEU0bAD6AAD6YAj/lw//vgrm/wj///96ZCqfAAAAAXRSTlMAQObYZgAAAKdJREFUGNNlUcENwyAMtDew3QkMygAlYoGoE4QmG8D+I/SIVFVx74OOuwN8EF0Qph+EVb8bQsTqpnMFZWEzc3dhmRRKAuCYlB6aSi456fMK657WVte0KF3mJdfaWtmnmdlSO4CaXMDNcj3P3t+b+4zm9ehjnMdrQxheiGNAhpvUER0AwqZQEZ20twI10D/z7ahwUXhGfOR9hDhgGD+UE6oLxYbab5/yAYvTNSH7RNf4AAAAAElFTkSuQmCC" />
+src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcBAMAAACAI8KnAAAAFVBMVEU0bAD6AAD6YAj/lw/
+/vgrm/wj///96ZCqfAAAAAXRSTlMAQObYZgAAAKdJREFUGNNlUcENwyAMtDew3QkMygAlYoGoE4QmG8D+I/SIVFVx74OOuwN8E 
+F0Qph+EVb8bQsTqpnMFZWEzc3dhmRRKAuCYlB6aSi456fMK657WVte0KF3mJdfaWtmnmdlSO4CaXMDNcj3P3t+b+4zm9ehjnMd
+rQxheiGNAhpvUER0AwqZQEZ20twI10D/z7ahwUXhGfOR9hDhgGD+UE6oLxYbab5/yAYvTNSH7RNf4AAAAAElFTkSuQmCC" />
 <img id="rocket" class="sprites"
- src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAARBAMAAAD5z0voAAAAIVBMVEUAAAAwMDC0OL8AAAAAAACZmZnMzMz/AAD/mQD/zAD/ZgA8TFO+AAAAAXRSTlMAQObYZgAAADRJREFUCNdjYMALXBxAJEtYCIjtEhYC5LOkhIWkgLhhIQ5wORyUiwuYqioBG+YFNoyBBYgBH7MKUa2viCQAAAAASUVORK5CYII=" />
+src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAARBAMAAAD5z0voAAAAIVBMVEUAAAAwMDC0OL8AAAA
+AAACZmZnMzMz/AAD/mQD/zAD/ZgA8TFO+AAAAAXRSTlMAQObYZgAAADRJREFUCNdjYMALXBxAJEtYCIjtEhYC5LOkhIWkgLhhI
+Q5wORyUiwuYqioBG+YFNoyBBYgBH7MKUa2viCQAAAAASUVORK5CYII=" />
 <img id="earth" class="sprites"
- src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAh1BMVEUAAAAAAAAAZgAAADMAAAAAAGYAMwBmZjNmZmYzAMwAM5kzmTP/zJmZzGYAAMwzMwBmmWaZzDMAAJmZmZkAM8wAZjMAMzNmZpmZmczMzGaZmWYzM5kzMzMAM2bMzJkzZmZmmTOZZmYAZmYzZjMzZpn/zGZmMzOZmTNmmZlmzGbMzMxmMwD/zMwCEFx3AAAAAXRSTlMAQObYZgAAATlJREFUOMut1NdugzAUgOFwLDwA2+wSRgnZ6/2frz4x6YxaQ/pL3H3IsuF4sXgizrPs/yAfq6o/sBNkTOv9vu85j+OmUep4jONnICEItaYmgCAAyPPYFIbzIDLGLhfGAJApE4zNh8OgdV2vVgBNIwRAGD6gjpAQu3RdA3QdLi1EUTwLNxvGytL3g2C7zXMh8IAA+n69TpJ36gjJrbLUmhDfT1NkdukwFKLrTicpp0HPs5RShFians+vpuVSqcCUJHOg533AqopMS9P1GkV5Pm7GGeJ2PA8hPgizLIrkLXxBiE8HPglajHAYDgf8OZJEyt1OqekQN3TPbqgscSAolXI8mtmQjPk+pXbMvg2XM7zT+5HjZyyKH6M1CVratl/hw7vHGWJty/nLrar69X50hliWce50hzvDh70BGEcolXXRDdgAAAAASUVORK5CYII=" />
+src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAh1BMVEUAAAAAAAAAZgAAADM
+AAAAAAGYAMwBmZjNmZmYzAMwAM5kzmTP/zJmZzGYAAMwzMwBmmWaZzDMAAJmZmZkAM8wAZjMAMzNmZpmZmczMzGaZmWYzM5kzM
+zMAM2bMzJkzZmZmmTOZZmYAZmYzZjMzZpn/zGZmMzOZmTNmmZlmzGbMzMxmMwD/zMwCEFx3AAAAAXRSTlMAQObYZgAAATlJREF
+UOMut1NdugzAUgOFwLDwA2+wSRgnZ6/2frz4x6YxaQ/pL3H3IsuF4sXgizrPs/yAfq6o/sBNkTOv9vu85j+OmUep4jONnICEIt
+aYmgCAAyPPYFIbzIDLGLhfGAJApE4zNh8OgdV2vVgBNIwRAGD6gjpAQu3RdA3QdLi1EUTwLNxvGytL3g2C7zXMh8IAA+n69TpJ
+36gjJrbLUmhDfT1NkdukwFKLrTicpp0HPs5RShFians+vpuVSqcCUJHOg533AqopMS9P1GkV5Pm7GGeJ2PA8hPgizLIrkLXxBi
+E8HPglajHAYDgf8OZJEyt1OqekQN3TPbqgscSAolXI8mtmQjPk+pXbMvg2XM7zT+5HjZyyKH6M1CVratl/hw7vHGWJty/nLrar
+69X50hliWce50hzvDh70BGEcolXXRDdgAAAAASUVORK5CYII=" />
+<img id="space" class="sprites" src="space.png" />"
+
 <script language="javascript">
 
 var canvas = document.getElementById('scene');
@@ -122,9 +140,11 @@ function rectToPolar(coord){
 }
 
 function clearBackground() {
+    var img = document.getElementById('space');
+    ctx.drawImage(img, -canvas.width/2, -canvas.height/2);
     var gradient = ctx.createRadialGradient(0, 0, univers.earth.size, 0, 0, canvas.height/2);
-    gradient.addColorStop(0, 'darkcyan');
-    gradient.addColorStop(1, 'black');
+    gradient.addColorStop(0, '#008B8BC0');
+    gradient.addColorStop(1, '#00000000');
     ctx.fillStyle = gradient;
     ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
 }
@@ -218,7 +238,7 @@ function getAcceleration(rocket) {
 
 function turnRocket(rocket) {
     if (rocket.turning != 0) {
-        rocket.acceleration.teta += rocket.turning * Math.PI/400;
+        rocket.acceleration.teta += rocket.turning * Math.PI/100;
     }
 }
 
